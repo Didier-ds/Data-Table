@@ -130,36 +130,27 @@
               <q-checkbox dense v-model="props.selected" />
             </q-td>
             <q-td key="name">
-              <p class="text-shallow">{{ props.row.name }}</p>
-              <p>{{ props.row.email }}</p>
+              <p>{{ props.row.firstName }} {{ props.row.lastName }}</p>
+              <p class="text-shallow">{{ props.row.email }}</p>
             </q-td>
-            <q-td key="status" :props="props">
-              <div class="flex items-center text-primary gap-4">
-                <div>
-                  <svg
-                    width="6"
-                    height="6"
-                    viewBox="0 0 6 6"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="3" cy="3" r="3" fill="#4A4AFF" />
-                  </svg>
-                </div>
-                <p>{{ props.row.status }}</p>
-              </div>
-              <p class="capitalize">Last Login</p>
+            <q-td key="status" class="" :props="props">
+              <Status :status="props.row.userStatus" :type="userStatus" />
+              <p class="">Last login:{{ props.row.lastLogin }}</p>
             </q-td>
             <q-td key="payment_status" :props="props">
               <div>
-                <p class="bg-success">{{ props.row.payment_status }}</p>
+                <Status
+                  :status="props.row.paymentStatus"
+                  :type="paymentStatus"
+                />
                 <p class="text-gray-800">Paid on 15/APR/2020</p>
               </div>
             </q-td>
             <q-td key="amount" :props="props">
-              <q-badge color="orange">
-                {{ props.row.amount }}
-              </q-badge>
+              <div>
+                <p>${{ CENTSTODOLLARS(props.row.amountInCents) }}</p>
+                <p>USD</p>
+              </div>
             </q-td>
             <q-td class="p-2">
               <svg
@@ -203,6 +194,7 @@ input {
 <script setup>
 // import axios from 'axios'
 import { ref, computed, onMounted } from "vue";
+import Status from "./components/Status.vue";
 import { useStore } from "vuex";
 const selected = ref([]);
 const loading = ref(false);
@@ -222,6 +214,11 @@ const fetchUsers = () => {
     .then(() => (loading.value = false))
     .catch(() => (loading.value = false));
 };
+// function to convert cents to dollars
+const CENTSTODOLLARS = (val) => {
+  // 1 cents = 0.01 dollars
+  return +val * 0.01;
+};
 onMounted(() => {
   fetchUsers();
 });
@@ -237,13 +234,14 @@ const columns = [
   },
   {
     name: "status",
-    align: "center",
+    align: "left",
     label: "User Status",
     field: "status",
     sortable: true,
   },
   {
     name: "payment_status",
+    align: "left",
     label: "Payment Status (g)",
     field: "payment_status",
     sortable: true,
