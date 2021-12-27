@@ -41,7 +41,7 @@
         selection="multiple"
         :selected-rows-label="getSelectedString"
         :columns="columns"
-        row-key="name"
+        row-key="firstName"
         flat
         :loading="loading"
         v-model:selected="selected"
@@ -130,17 +130,27 @@
             <q-td auto-width>
               <q-checkbox dense v-model="props.selected" />
             </q-td>
-            <q-td key="name">
+            <q-td key="dropdown">
+              <q-btn
+                size="sm"
+                color="accent"
+                round
+                dense
+                @click="props.expand = !props.expand"
+                :icon="props.expand ? 'remove' : 'add'"
+              />
+            </q-td>
+            <q-td key="firstName">
               <p class="text-base">
                 {{ props.row.firstName }} {{ props.row.lastName }}
               </p>
               <p class="text-base text-shallow">{{ props.row.email }}</p>
             </q-td>
-            <q-td key="status" class="" :props="props">
+            <q-td key="userStatus" class="" :props="props">
               <Status :status="props.row.userStatus" :type="userStatus" />
               <p class="text-shallow">Last login: {{ props.row.lastLogin }}</p>
             </q-td>
-            <q-td key="payment_status" :props="props">
+            <q-td key="paymentStatus" :props="props">
               <div>
                 <Status
                   :status="props.row.paymentStatus"
@@ -149,7 +159,7 @@
                 <p class="text-gray-800">Paid on 15/APR/2020</p>
               </div>
             </q-td>
-            <q-td key="amount" :props="props">
+            <q-td key="amountInCents" :props="props">
               <div>
                 <p class="font-medium text-base">
                   ${{ CENTSTODOLLARS(props.row.amountInCents) }}
@@ -174,6 +184,13 @@
                   fill="#8B83BA"
                 />
               </svg>
+            </q-td>
+          </q-tr>
+          <q-tr v-show="props.expand" :props="props">
+            <q-td colspan="100%">
+              <div class="text-left">
+                This is expand slot for row above: {{ props.row.lastName }}.
+              </div>
             </q-td>
           </q-tr>
         </template>
@@ -246,7 +263,13 @@ onMounted(() => {
 });
 const columns = [
   {
-    name: "name",
+    name: "dropdown",
+    required: true,
+    label: "",
+    align: "left",
+  },
+  {
+    name: "firstName",
     required: true,
     label: "Name",
     align: "left",
@@ -255,20 +278,20 @@ const columns = [
     sortable: true,
   },
   {
-    name: "status",
+    name: "userStatus",
     align: "left",
     label: "User Status",
     field: "status",
     sortable: true,
   },
   {
-    name: "payment_status",
+    name: "paymentStatus",
     align: "left",
     label: "Payment Status (g)",
     field: "payment_status",
     sortable: true,
   },
-  { name: "amount", align: "right", label: "Amount", field: "amount" },
+  { name: "amountInCents", align: "right", label: "Amount", field: "amount" },
   { name: "more", align: "right", label: "", field: "" },
 ];
 
