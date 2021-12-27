@@ -95,7 +95,7 @@
           </button>
         </template>
         <template v-slot:header="props">
-          <q-tr :props="props">
+          <q-tr :props="props" class="head">
             <q-th auto-width>
               <q-checkbox dense v-model="props.selected" />
             </q-th>
@@ -103,10 +103,11 @@
               v-for="col in props.cols"
               :key="col.name"
               :props="props"
-              class="font-bold text-lg uppercase text-primary"
+              class="font-bold text-base uppercase text-primary"
             >
               {{ col.label }}
             </q-th>
+
             <q-th class="p-2">
               <svg
                 class="mx-auto"
@@ -125,17 +126,19 @@
           </q-tr>
         </template>
         <template v-slot:body="props">
-          <q-tr :props="props">
+          <q-tr :props="props" class="font-medium text-lg">
             <q-td auto-width>
               <q-checkbox dense v-model="props.selected" />
             </q-td>
             <q-td key="name">
-              <p>{{ props.row.firstName }} {{ props.row.lastName }}</p>
-              <p class="text-shallow">{{ props.row.email }}</p>
+              <p class="text-base">
+                {{ props.row.firstName }} {{ props.row.lastName }}
+              </p>
+              <p class="text-base text-shallow">{{ props.row.email }}</p>
             </q-td>
             <q-td key="status" class="" :props="props">
               <Status :status="props.row.userStatus" :type="userStatus" />
-              <p class="">Last login:{{ props.row.lastLogin }}</p>
+              <p class="text-shallow">Last login: {{ props.row.lastLogin }}</p>
             </q-td>
             <q-td key="payment_status" :props="props">
               <div>
@@ -148,9 +151,14 @@
             </q-td>
             <q-td key="amount" :props="props">
               <div>
-                <p>${{ CENTSTODOLLARS(props.row.amountInCents) }}</p>
-                <p>USD</p>
+                <p class="font-medium text-base">
+                  ${{ CENTSTODOLLARS(props.row.amountInCents) }}
+                </p>
+                <p class="text-gray-400">USD</p>
               </div>
+            </q-td>
+            <q-td key="more" :props="props">
+              <p class="text-shallow">View more</p>
             </q-td>
             <q-td class="p-2">
               <svg
@@ -174,7 +182,7 @@
   </div>
 </template>
 <style lang="scss">
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&display=swap");
 * {
   font-family: "Inter", sans-serif;
 }
@@ -188,6 +196,20 @@ input {
 .tab_list.active {
   border-bottom: 2px solid #25213b;
   color: #25213b !important;
+}
+.q-table .head {
+  background: #f4f2ff;
+  th {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 600;
+
+    line-height: 15px;
+    /* identical to box height */
+
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
 }
 </style>
 
@@ -217,7 +239,7 @@ const fetchUsers = () => {
 // function to convert cents to dollars
 const CENTSTODOLLARS = (val) => {
   // 1 cents = 0.01 dollars
-  return +val * 0.01;
+  return Math.round(+val * 0.01);
 };
 onMounted(() => {
   fetchUsers();
@@ -246,7 +268,8 @@ const columns = [
     field: "payment_status",
     sortable: true,
   },
-  { name: "amount", label: "Amount", field: "amount" },
+  { name: "amount", align: "right", label: "Amount", field: "amount" },
+  { name: "more", align: "right", label: "", field: "" },
 ];
 
 const rows = [

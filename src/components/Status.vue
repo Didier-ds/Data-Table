@@ -1,6 +1,6 @@
 <template>
   <q-badge
-    class="flex items-center gap-1 px-2 justify-center text-tiny capitalize font-medium"
+    class="flex items-center gap-1 px-2 py-1 justify-center text-tiny capitalize font-semibold"
     rounded
     :class="status"
   >
@@ -56,7 +56,7 @@ const props = defineProps({
   }
 }
 .inactive {
-  background: #ffe0e0;
+  background: #f2f0f9;
   color: #6e6893;
   svg circle {
     fill: #6e6893;
