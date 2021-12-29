@@ -47,23 +47,47 @@
         v-model:selected="selected"
       >
         <template v-slot:top>
-          <button
-            class="border p-2 px-3 border-gray-300 flex items-center text-lg rounded-md mr-4 capitalize"
-            flat
-          >
-            <div class="pr-2">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M12 12L20 4V0H0V4L8 12V20L12 16V12Z" fill="#8B83BA" />
-              </svg>
-            </div>
-            <p>Filter</p>
-          </button>
+          <div color="primary" label="Basic Menu">
+            <button
+              class="border p-2 px-3 border-gray-300 flex items-center text-lg rounded-md mr-4 capitalize"
+              flat
+            >
+              <div class="pr-2">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 12L20 4V0H0V4L8 12V20L12 16V12Z"
+                    fill="#8B83BA"
+                  />
+                </svg>
+              </div>
+              <p>Filter</p>
+            </button>
+            <q-menu
+              class="ax-rounded ax-transform ax-shadow-wide ax-translate-y-2 ax-border"
+            >
+              <q-list style="min-width: 200px">
+                <q-item
+                  clickable
+                  v-close-popup
+                  v-for="(category, index) in categories"
+                  :key="index"
+                >
+                  <q-radio
+                    left-label
+                    v-model="shape"
+                    :val="category"
+                    :label="category"
+                  />
+                </q-item>
+              </q-list>
+            </q-menu>
+          </div>
           <label class="relative block flex-1">
             <span class="sr-only">Search</span>
             <span class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -126,19 +150,37 @@
           </q-tr>
         </template>
         <template v-slot:body="props">
-          <q-tr :props="props" class="font-medium text-lg">
+          <q-tr
+            :props="props"
+            @click="props.expand = !props.expand"
+            class="font-medium text-lg"
+          >
             <q-td auto-width>
               <q-checkbox dense v-model="props.selected" />
             </q-td>
             <q-td key="dropdown">
-              <q-btn
-                size="sm"
-                color="accent"
-                round
-                dense
+              <button
                 @click="props.expand = !props.expand"
-                :icon="props.expand ? 'remove' : 'add'"
-              />
+                class="transition fade-in-out delay-150"
+                :class="props.expand ? 'active' : ''"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 15 15"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.97895 9.85263C7.24737 10.1211 7.73684 10.1211 8.00526 9.85263L10.8474 7.01053C11.1316 6.72632 11.1316 6.26842 10.8474 5.98421C10.5632 5.7 10.1053 5.7 9.82105 5.98421L7.5 8.30526L5.17895 5.98421C5.03684 5.84211 4.84737 5.76316 4.65789 5.76316C4.46842 5.76316 4.27895 5.84211 4.13684 5.98421C3.85263 6.26842 3.85263 6.72632 4.13684 7.01053L6.97895 9.85263Z"
+                    fill="#8B83BA"
+                  />
+                  <path
+                    d="M7.5 15C11.6368 15 15 11.6368 15 7.5C15 3.36316 11.6368 0 7.5 0C3.36316 0 0 3.36316 0 7.5C0 11.6368 3.36316 15 7.5 15ZM7.5 1.45263C10.8316 1.45263 13.5474 4.16842 13.5474 7.5C13.5474 10.8316 10.8316 13.5474 7.5 13.5474C4.16842 13.5474 1.45263 10.8316 1.45263 7.5C1.45263 4.16842 4.16842 1.45263 7.5 1.45263Z"
+                    fill="#8B83BA"
+                  />
+                </svg>
+              </button>
             </q-td>
             <q-td key="firstName">
               <p class="text-base">
@@ -186,10 +228,49 @@
               </svg>
             </q-td>
           </q-tr>
-          <q-tr v-show="props.expand" :props="props">
+          <q-tr v-show="props.expand" class="sub_row" :props="props">
             <q-td colspan="100%">
               <div class="text-left">
-                This is expand slot for row above: {{ props.row.lastName }}.
+                <q-table
+                  :rows="props.row.activities"
+                  :table-class="''"
+                  :columns="sub_column"
+                  row-key="date"
+                  flat
+                  :loading="loading"
+                >
+                  <template v-slot:header="props">
+                    <q-tr :props="props" class="head">
+                      <q-th
+                        v-for="col in props.cols"
+                        :key="col.name"
+                        :props="props"
+                        class="font-bold text-base uppercase text-primary"
+                      >
+                        {{ col.label }}
+                      </q-th>
+                    </q-tr>
+                  </template>
+                  <template v-slot:body="props">
+                    <tr>
+                      <q-td key="date" :props="props">
+                        <p class="font- py-2 text-base">
+                          {{ props.row.date }}
+                        </p>
+                      </q-td>
+                      <q-td key="userActivity" :props="props">
+                        <p class="font- py-2 text-base">
+                          {{ props.row.userActivity }}
+                        </p>
+                      </q-td>
+                      <q-td key="detail" :props="props">
+                        <p class="font- py-2 text-base">
+                          {{ props.row.details }}
+                        </p>
+                      </q-td>
+                    </tr>
+                  </template>
+                </q-table>
               </div>
             </q-td>
           </q-tr>
@@ -213,6 +294,19 @@ input {
 .tab_list.active {
   border-bottom: 2px solid #25213b;
   color: #25213b !important;
+}
+button.active {
+  transform: rotate(180deg);
+}
+.sub_row {
+  background: #f4f2ff;
+  table-layout: fixed;
+  .q-table tr {
+    background: #f4f2ff;
+  }
+  .q-td {
+    padding: 0;
+  }
 }
 .q-table .head {
   background: #f4f2ff;
@@ -253,6 +347,7 @@ const fetchUsers = () => {
     .then(() => (loading.value = false))
     .catch(() => (loading.value = false));
 };
+const shape = ref("line");
 // function to convert cents to dollars
 const CENTSTODOLLARS = (val) => {
   // 1 cents = 0.01 dollars
@@ -261,6 +356,37 @@ const CENTSTODOLLARS = (val) => {
 onMounted(() => {
   fetchUsers();
 });
+const categories = [
+  "Newest Arrivals",
+  "Price: Low to High",
+  "Price: High to Low",
+  "Product Rating",
+];
+
+const sub_column = [
+  {
+    name: "date",
+    required: true,
+    label: "date",
+    align: "left",
+    headerStyle: "padding-left: 10.5em",
+    style: "width: 100px; padding-left:10.5em; white-space:normal",
+  },
+  {
+    name: "userActivity",
+    required: true,
+    label: "User Activity",
+    align: "left",
+    style: "width: 200px; padding-right:3em; white-space:normal",
+  },
+  {
+    name: "detail",
+    required: true,
+    label: "Detail",
+    align: "left",
+    style: "width: 300px; padding-right:5em; white-space:normal",
+  },
+];
 const columns = [
   {
     name: "dropdown",
