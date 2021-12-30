@@ -36,7 +36,7 @@
     <p>{{ "users" }}</p>
     <div class="border shadow-lg rounded-lg overflow-hidden">
       <q-table
-        :rows="users"
+        :rows="filteredResults"
         :table-class="''"
         selection="multiple"
         :selected-rows-label="getSelectedString"
@@ -68,23 +68,57 @@
               </div>
               <p>Filter</p>
             </button>
-            <q-menu
-              class="ax-rounded ax-transform ax-shadow-wide ax-translate-y-2 ax-border"
-            >
-              <q-list style="min-width: 200px">
-                <q-item
-                  clickable
-                  v-close-popup
+            <q-menu class="rounded transform shadow-lg translate-y-2 border">
+              <p class="uppercase text-xs px-4 mt-4">Sort By:</p>
+
+              <q-list
+                style="min-width: 200px; font-size: 0.8em; padding: 1em 0.5em"
+              >
+                <div
                   v-for="(category, index) in categories"
                   :key="index"
+                  class="flex justify-between hover:bg-gray-200 text-gray-900 rounded items-center"
+                  clickable
+                  v-close-popup
+                  v-ripple
                 >
-                  <q-radio
-                    left-label
-                    v-model="shape"
-                    :val="category"
-                    :label="category"
+                  <label
+                    :for="'userState' + index"
+                    class="flex-1 p-2 text-sm"
+                    >{{ category }}</label
+                  >
+                  <RadioButton
+                    :id="'userState' + index"
+                    name="userState"
+                    :value="category"
+                    v-model="sortBy"
+                    class="m-2"
                   />
-                </q-item>
+                </div>
+
+                <q-separator class="my-2" />
+
+                <div
+                  v-for="(category, index) in userByStatus"
+                  :key="index"
+                  class="flex justify-between hover:bg-gray-200 text-gray-900 rounded items-center"
+                  clickable
+                  v-close-popup
+                  v-ripple
+                >
+                  <label
+                    :for="'userStatus' + index"
+                    class="flex-1 p-2 text-sm"
+                    >{{ category }}</label
+                  >
+                  <RadioButton
+                    :id="'userStatus' + index"
+                    name="userStatus"
+                    :value="category"
+                    v-model="usersSort"
+                    class="m-2"
+                  />
+                </div>
               </q-list>
             </q-menu>
           </div>
@@ -102,7 +136,9 @@
               class="placeholder:text-primary text-primary block w-full border border-white rounded-md py-3 pl-10 pr-3 focus:outline-none hover:border-primary focus:border-primary sm:text-sm"
               placeholder="Search Users by Name, Email or Date"
               type="text"
+              @input="performSearch"
               name="search"
+              v-model="search"
             />
           </label>
 
@@ -328,6 +364,7 @@ button.active {
 // import axios from 'axios'
 import { ref, computed, onMounted } from "vue";
 import Status from "./components/Status.vue";
+import { columns } from "./utils/data.js";
 import { useStore } from "vuex";
 const selected = ref([]);
 const loading = ref(false);
@@ -340,6 +377,8 @@ function getSelectedString() {
 }
 const store = useStore();
 const users = computed(() => store.getters["allUsers"]);
+const filteredResults = ref(users.value);
+// const search = ref('')
 const fetchUsers = () => {
   loading.value = true;
   store
@@ -347,22 +386,12 @@ const fetchUsers = () => {
     .then(() => (loading.value = false))
     .catch(() => (loading.value = false));
 };
-const shape = ref("line");
-// function to convert cents to dollars
-const CENTSTODOLLARS = (val) => {
-  // 1 cents = 0.01 dollars
-  return Math.round(+val * 0.01);
+const search = ref("");
+const performSearch = () => {
+  filteredResults.value = users.value.filter((obj) => {
+    return JSON.stringify(obj).toString().toLowerCase().includes(search.value);
+  });
 };
-onMounted(() => {
-  fetchUsers();
-});
-const categories = [
-  "Newest Arrivals",
-  "Price: Low to High",
-  "Price: High to Low",
-  "Product Rating",
-];
-
 const sub_column = [
   {
     name: "date",
@@ -387,39 +416,30 @@ const sub_column = [
     style: "width: 300px; padding-right:5em; white-space:normal",
   },
 ];
-const columns = [
-  {
-    name: "dropdown",
-    required: true,
-    label: "",
-    align: "left",
-  },
-  {
-    name: "firstName",
-    required: true,
-    label: "Name",
-    align: "left",
-    field: (row) => row.name,
-    format: (val) => `${val}`,
-    sortable: true,
-  },
-  {
-    name: "userStatus",
-    align: "left",
-    label: "User Status",
-    field: "status",
-    sortable: true,
-  },
-  {
-    name: "paymentStatus",
-    align: "left",
-    label: "Payment Status (g)",
-    field: "payment_status",
-    sortable: true,
-  },
-  { name: "amountInCents", align: "right", label: "Amount", field: "amount" },
-  { name: "more", align: "right", label: "", field: "" },
+
+const sortBy = ref("Default");
+const usersSort = ref("all");
+// function to convert cents to dollars
+const CENTSTODOLLARS = (val) => {
+  // 1 cents = 0.01 dollars
+  return Math.round(+val * 0.01);
+};
+
+// watch(sortBy, (currentValue) => {
+
+// })
+
+onMounted(() => {
+  fetchUsers();
+});
+const categories = [
+  "Default",
+  "First Name",
+  "Last Name",
+  "Due Date",
+  "Last Login",
 ];
+const userByStatus = ["All", "Active", "Inactive"];
 
 const rows = [
   {
