@@ -186,11 +186,7 @@
           </q-tr>
         </template>
         <template v-slot:body="props">
-          <q-tr
-            :props="props"
-            @click="props.expand = !props.expand"
-            class="font-medium text-lg"
-          >
+          <q-tr :props="props" class="font-medium text-lg">
             <q-td auto-width>
               <q-checkbox dense v-model="props.selected" />
             </q-td>
@@ -262,6 +258,93 @@
                   fill="#8B83BA"
                 />
               </svg>
+
+              <q-menu
+                class="rounded transform relative -translate-y-10 -translate-x-36 shadow-lg border"
+                style="overflow: inherit"
+              >
+                <div class="absolute -right-4 -top-4 transform">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g filter="url(#filter0_d_248_0)">
+                      <circle cx="12" cy="12" r="10" fill="white" />
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M15.2102 8.7736C14.9148 8.47749 14.4715 8.47749 14.1761 8.7736L12.0093 10.9451L9.84244 8.7736C9.54696 8.47749 9.10375 8.47749 8.80828 8.7736C8.5128 9.06971 8.5128 9.51388 8.80828 9.81L10.9751 11.9815L8.80828 14.153C8.5128 14.4491 8.5128 14.8933 8.80828 15.1894C8.95601 15.3374 9.153 15.3868 9.34998 15.3868C9.54696 15.3868 9.74395 15.3374 9.89168 15.1894L12.0585 13.0179L14.2253 15.1894C14.3731 15.3374 14.57 15.3868 14.767 15.3868C14.964 15.3868 15.161 15.3374 15.3087 15.1894C15.6042 14.8933 15.6042 14.4491 15.3087 14.153L13.1419 11.9815L15.3087 9.81C15.5057 9.51388 15.5057 9.06971 15.2102 8.7736Z"
+                        fill="#8B83BA"
+                      />
+                    </g>
+                    <defs>
+                      <filter
+                        id="filter0_d_248_0"
+                        x="0"
+                        y="0"
+                        width="24"
+                        height="24"
+                        filterUnits="userSpaceOnUse"
+                        color-interpolation-filters="sRGB"
+                      >
+                        <feFlood
+                          flood-opacity="0"
+                          result="BackgroundImageFix"
+                        />
+                        <feColorMatrix
+                          in="SourceAlpha"
+                          type="matrix"
+                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                          result="hardAlpha"
+                        />
+                        <feOffset />
+                        <feGaussianBlur stdDeviation="1" />
+                        <feColorMatrix
+                          type="matrix"
+                          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                        />
+                        <feBlend
+                          mode="normal"
+                          in2="BackgroundImageFix"
+                          result="effect1_dropShadow_248_0"
+                        />
+                        <feBlend
+                          mode="normal"
+                          in="SourceGraphic"
+                          in2="effect1_dropShadow_248_0"
+                          result="shape"
+                        />
+                      </filter>
+                    </defs>
+                  </svg>
+                </div>
+                <q-list style="min-width: 180px; padding: 0.5em">
+                  <div
+                    class="p-1 cursor-default rounded text-base hover:bg-gray-200 text-gray-900"
+                  >
+                    Edit
+                  </div>
+                  <div
+                    class="p-1 cursor-default rounded text-base hover:bg-gray-200 text-gray-900"
+                  >
+                    View Profile
+                  </div>
+                  <div
+                    class="p-1 cursor-default rounded text-base hover:bg-gray-200 text-green-900"
+                  >
+                    Activate User
+                  </div>
+                  <hr class="my-2 mx-auto" />
+                  <div
+                    class="p-1 cursor-default rounded text-base hover:bg-gray-200 text-red-500"
+                  >
+                    Delete
+                  </div>
+                </q-list>
+              </q-menu>
             </q-td>
           </q-tr>
           <q-tr v-show="props.expand" class="sub_row" :props="props">
