@@ -50,7 +50,7 @@
         selection="single"
         :selected-rows-label="getSelectedString"
         :columns="columns"
-        row-key="firstName"
+        row-key="email"
         flat
         :loading="loading"
         v-model:selected="selected"
@@ -224,17 +224,17 @@
                 </svg>
               </button>
             </q-td>
-            <q-td key="firstName">
+            <q-td :key="'firstName'">
               <p class="text-base">
                 {{ props.row.firstName }} {{ props.row.lastName }}
               </p>
               <p class="text-base text-shallow">{{ props.row.email }}</p>
             </q-td>
-            <q-td key="userStatus" class="" :props="props">
+            <q-td :key="'userStatus'" class="" :props="props">
               <Status :status="props.row.userStatus" :type="userStatus" />
               <p class="text-shallow">Last login: {{ props.row.lastLogin }}</p>
             </q-td>
-            <q-td key="paymentStatus" :props="props">
+            <q-td :key="'paymentStatus'" :props="props">
               <div>
                 <Status
                   :status="props.row.paymentStatus"
@@ -243,7 +243,7 @@
                 <p class="text-gray-800">Paid on 15/APR/2020</p>
               </div>
             </q-td>
-            <q-td key="amountInCents" :props="props">
+            <q-td :key="'amountInCents'" :props="props">
               <div>
                 <p class="font-medium text-base">
                   ${{ CENTSTODOLLARS(props.row.amountInCents) }}
@@ -456,16 +456,26 @@ button.active {
 <script setup>
 // import axios from 'axios'
 import { ref, computed, onMounted } from "vue";
+import { useQuasar } from "quasar";
 import Status from "./components/Status.vue";
 import { columns } from "./utils/data.js";
 import { useStore } from "vuex";
 const selected = ref([]);
 const loading = ref(false);
+const $q = useQuasar();
 const payDues = () => {
   loading.value = true;
   store
     .dispatch("MARKASPAID", selected.value[0].id)
-    .then(() => (loading.value = false))
+    .then(() => {
+      filteredResults.value = users.value;
+      selected.value = [];
+      loading.value = false;
+      $q.notify({
+        type: "positive",
+        message: 'This is a "positive" type notification.',
+      });
+    })
     .catch(() => (loading.value = false));
 };
 function getSelectedString() {

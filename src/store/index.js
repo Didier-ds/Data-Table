@@ -13,6 +13,10 @@ export default createStore({
     SET_USERS(state, data) {
       state.users = data;
     },
+    MARK_USER(state, data) {
+      //console.log(id, data)
+      state.users.splice(data[1], 1, data[0]);
+    },
   },
   actions: {
     GETALLUSERS({ commit }) {
@@ -29,11 +33,14 @@ export default createStore({
         }
       );
     },
-    MARKASPAID({ commit }, id) {
+    MARKASPAID({ state, commit }, id) {
+      const location = state.users.findIndex((user) => user.id === id);
       return service.markAsPaid(id).then(
         (res) => {
           console.log(res.data.data);
-          commit("SET_USERS", res.data.data);
+          const data = [res.data.data, location];
+          commit("MARK_USER", data);
+          console.log(data);
           return Promise.resolve(res);
         },
         (error) => {
