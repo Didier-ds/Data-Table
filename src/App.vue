@@ -6,22 +6,30 @@
     >
       <ul class="flex gap-4">
         <li
-          class="p-2 font-medium text-primary text-center cursor-default tab_list active"
+          @click="filterData('all')"
+          class="p-2 font-medium text-primary text-center cursor-default tab_list"
+          :class="tab === 'all' ? 'active' : ''"
         >
           All
         </li>
         <li
+          @click="filterData('unpaid')"
           class="p-2 font-medium text-primary text-center cursor-default tab_list"
+          :class="tab === 'unpaid' ? 'active' : ''"
         >
           Unpaid
         </li>
         <li
+          @click="filterData('paid')"
           class="p-2 font-medium text-primary text-center cursor-default tab_list"
+          :class="tab === 'paid' ? 'active' : ''"
         >
           Paid
         </li>
         <li
+          @click="filterData('overdue')"
           class="p-2 font-medium text-primary text-center cursor-default tab_list"
+          :class="tab === 'overdue' ? 'active' : ''"
         >
           Overdue
         </li>
@@ -29,16 +37,17 @@
       <div>
         <p class="text-primary">
           Total payable amount:
-          <span class="font-bold text-lg">$900.00 USD</span>
+          <span class="font-bold text-lg">${{ CENTSTODOLLARS(total) }}</span>
+          <span class="pl-1 text-lg">USD</span>
         </p>
       </div>
     </div>
-    <p>{{ "users" }}</p>
+
     <div class="border shadow-lg rounded-lg overflow-hidden">
       <q-table
         :rows="filteredResults"
         :table-class="''"
-        selection="multiple"
+        selection="single"
         :selected-rows-label="getSelectedString"
         :columns="columns"
         row-key="firstName"
@@ -149,6 +158,7 @@
           </q-input> -->
           <q-space />
           <button
+            @click="payDues"
             class="p-2 px-3 uppercase bg-secondary text-white font-medium text-lg rounded"
           >
             Pay Dues
@@ -451,6 +461,13 @@ import { columns } from "./utils/data.js";
 import { useStore } from "vuex";
 const selected = ref([]);
 const loading = ref(false);
+const payDues = () => {
+  loading.value = true;
+  store
+    .dispatch("MARKASPAID", selected.value[0].id)
+    .then(() => (loading.value = false))
+    .catch(() => (loading.value = false));
+};
 function getSelectedString() {
   return selected.value.length === 0
     ? ""
@@ -459,7 +476,50 @@ function getSelectedString() {
       } selected of ${rows.length}`;
 }
 const store = useStore();
+const tab = ref("all");
+const total = computed(() => {
+  const newArr = users.value.filter(
+    (obj) => obj.paymentStatus === ("unpaid" || "overdue")
+  );
+  return newArr.reduce(function (a, b) {
+    return a + +b.amountInCents;
+  }, 0);
+});
 const users = computed(() => store.getters["allUsers"]);
+const filterData = (any) => {
+  switch (any) {
+    case "all":
+      {
+        filteredResults.value = users.value;
+        tab.value = "all";
+      }
+      break;
+    case "unpaid":
+      {
+        filteredResults.value = users.value.filter(
+          (obj) => obj.paymentStatus === "unpaid"
+        );
+        tab.value = "unpaid";
+      }
+      break;
+    case "paid":
+      {
+        filteredResults.value = users.value.filter(
+          (obj) => obj.paymentStatus === "paid"
+        );
+        tab.value = "paid";
+      }
+      break;
+    case "overdue":
+      {
+        filteredResults.value = users.value.filter(
+          (obj) => obj.paymentStatus === "overdue"
+        );
+        tab.value = "overdue";
+      }
+      break;
+  }
+};
 const filteredResults = ref(users.value);
 // const search = ref('')
 const fetchUsers = () => {
@@ -503,9 +563,11 @@ const sub_column = [
 const sortBy = ref("Default");
 const usersSort = ref("all");
 // function to convert cents to dollars
-const CENTSTODOLLARS = (val) => {
+const CENTSTODOLLARS = (value) => {
   // 1 cents = 0.01 dollars
-  return Math.round(+val * 0.01);
+  // const value = Math.round(+value * 0.01);
+  const val = (Math.round(+value * 0.01) / 1).toFixed(2).replace(",", ".");
+  return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 // watch(sortBy, (currentValue) => {

@@ -8,4 +8,7 @@ export default {
   getAllUsers() {
     return api.get("users/Mx57oBwnSWN20s9");
   },
+  markAsPaid(id) {
+    return api.post(`/mark-paid/${id}`);
+  },
 };
