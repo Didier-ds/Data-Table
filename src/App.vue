@@ -110,6 +110,7 @@
                 <div
                   v-for="(category, index) in userByStatus"
                   :key="index"
+                  @click="filterData('sortby' + category)"
                   class="flex justify-between hover:bg-gray-200 text-gray-900 rounded items-center"
                   clickable
                   v-close-popup
@@ -470,11 +471,11 @@ const payDues = () => {
     .then(() => {
       filteredResults.value = users.value;
       selected.value = [];
-      loading.value = false;
       $q.notify({
         type: "positive",
         message: 'This is a "positive" type notification.',
       });
+      loading.value = false;
     })
     .catch(() => (loading.value = false));
 };
@@ -526,6 +527,32 @@ const filterData = (any) => {
           (obj) => obj.paymentStatus === "overdue"
         );
         tab.value = "overdue";
+      }
+      break;
+    case "sortbyActive":
+      {
+        filteredResults.value = users.value.filter(
+          (obj) => obj.userStatus === "active"
+        );
+        usersSort.value = "Active";
+      }
+      break;
+    case "sortbyInactive":
+      {
+        filteredResults.value = users.value.filter(
+          (obj) => obj.userStatus === "inactive"
+        );
+        usersSort.value = "Inactive";
+      }
+      break;
+    case "sortbyAll":
+      {
+        filteredResults.value = users.value;
+      }
+      break;
+    case "sortbyfirstname":
+      {
+        filteredResults.value = users.value;
       }
       break;
   }
