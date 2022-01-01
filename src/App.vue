@@ -53,6 +53,9 @@
         row-key="email"
         flat
         :loading="loading"
+        color="primary"
+        :pagination="pagination"
+        :rows-per-page-label="'Rows Per Page'"
         v-model:selected="selected"
       >
         <template v-slot:top>
@@ -86,6 +89,7 @@
                 <div
                   v-for="(category, index) in categories"
                   :key="index"
+                  @click="filterData('sortby' + category[1])"
                   class="flex justify-between hover:bg-gray-200 text-gray-900 rounded items-center"
                   clickable
                   v-close-popup
@@ -94,12 +98,12 @@
                   <label
                     :for="'userState' + index"
                     class="flex-1 p-2 text-sm"
-                    >{{ category }}</label
+                    >{{ category[0] }}</label
                   >
                   <RadioButton
                     :id="'userState' + index"
                     name="userState"
-                    :value="category"
+                    :value="category[0]"
                     v-model="sortBy"
                     class="m-2"
                   />
@@ -241,7 +245,10 @@
                   :status="props.row.paymentStatus"
                   :type="paymentStatus"
                 />
-                <p class="text-gray-800">Paid on 15/APR/2020</p>
+                <p class="text-gray-800">
+                  {{ checkPaymentStatus(props.row.paymentStatus) }} on
+                  {{ props.row.paidOn }}
+                </p>
               </div>
             </q-td>
             <q-td :key="'amountInCents'" :props="props">
@@ -452,6 +459,41 @@ button.active {
     text-transform: uppercase;
   }
 }
+tr.q-tr.selected {
+  position: relative;
+}
+tr.q-tr.selected td:first-child::before {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 0;
+  content: "";
+  width: 5px;
+  background: #6e6893;
+}
+.q-table__bottom {
+  background: #f4f2ff;
+  span.q-table__bottom-item {
+    margin-left: 2em;
+  }
+  .q-table__bottom-item {
+    font-weight: 600;
+    color: #6e6893;
+    font-size: 1.2em;
+  }
+  .q-table__control {
+    .q-btn {
+      margin-left: 3em;
+    }
+    .q-field__native span {
+      font-weight: 600;
+      color: #6e6893;
+    }
+    .q-btn .q-icon {
+      font-size: 1.5em;
+    }
+  }
+}
 </style>
 
 <script setup>
@@ -464,6 +506,14 @@ import { useStore } from "vuex";
 const selected = ref([]);
 const loading = ref(false);
 const $q = useQuasar();
+const pagination = ref({
+  sortBy: "desc",
+  descending: false,
+  page: 2,
+  rowsPerPage: 10,
+  // rowsNumber: xx if getting data from a server
+});
+
 const payDues = () => {
   loading.value = true;
   store
@@ -496,6 +546,26 @@ const total = computed(() => {
     return a + +b.amountInCents;
   }, 0);
 });
+const checkPaymentStatus = (status) => {
+  let any = "";
+  console.log(status);
+  switch (status) {
+    case "paid":
+      {
+        any = "Paid";
+      }
+      break;
+    case "unpaid":
+      {
+        any = "Dues";
+      }
+      break;
+    case "overdue": {
+      any = "overdue";
+    }
+  }
+  return any;
+};
 const users = computed(() => store.getters["allUsers"]);
 const filterData = (any) => {
   switch (any) {
@@ -531,7 +601,7 @@ const filterData = (any) => {
       break;
     case "sortbyActive":
       {
-        filteredResults.value = users.value.filter(
+        filteredResults.value = filteredResults.value.filter(
           (obj) => obj.userStatus === "active"
         );
         usersSort.value = "Active";
@@ -539,7 +609,7 @@ const filterData = (any) => {
       break;
     case "sortbyInactive":
       {
-        filteredResults.value = users.value.filter(
+        filteredResults.value = filteredResults.value.filter(
           (obj) => obj.userStatus === "inactive"
         );
         usersSort.value = "Inactive";
@@ -552,7 +622,20 @@ const filterData = (any) => {
       break;
     case "sortbyfirstname":
       {
-        filteredResults.value = users.value;
+        filteredResults.value = filteredResults.value.sort((a, b) => {
+          if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return -1;
+          if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
+          return 0;
+        });
+      }
+      break;
+    case "sortbylastname":
+      {
+        filteredResults.value = filteredResults.value.sort((a, b) => {
+          if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return -1;
+          if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return 1;
+          return 0;
+        });
       }
       break;
   }
@@ -615,11 +698,11 @@ onMounted(() => {
   fetchUsers();
 });
 const categories = [
-  "Default",
-  "First Name",
-  "Last Name",
-  "Due Date",
-  "Last Login",
+  ["Default", "default"],
+  ["First Name", "firstname"],
+  ["Last Name", "lastname"],
+  ["Due Date", "duedate"],
+  ["Last Login", "lastlogin"],
 ];
 const userByStatus = ["All", "Active", "Inactive"];
 
