@@ -58,6 +58,8 @@
         flat
         :loading="loading"
         color="primary"
+        no-data-label="No Records Found"
+        no-results-label="No Records Found"
         :pagination="pagination"
         :rows-per-page-label="'Rows Per Page'"
         v-model:selected="selected"
@@ -233,19 +235,28 @@
                 </svg>
               </button>
             </q-td>
-            <q-td :key="'firstName'">
+            <q-td :key="'firstName'" @click="props.expand = !props.expand">
               <p class="text-base">
                 {{ props.row.firstName }} {{ props.row.lastName }}
               </p>
               <p class="text-base text-shallow">{{ props.row.email }}</p>
             </q-td>
-            <q-td :key="'userStatus'" class="" :props="props">
+            <q-td
+              :key="'userStatus'"
+              class=""
+              :props="props"
+              @click="props.expand = !props.expand"
+            >
               <Status :status="props.row.userStatus" :type="userStatus" />
               <p class="text-shallow">
                 Last login: {{ props.row.lastLogin }} {{ props.row.id }}
               </p>
             </q-td>
-            <q-td :key="'paymentStatus'" :props="props">
+            <q-td
+              :key="'paymentStatus'"
+              :props="props"
+              @click="props.expand = !props.expand"
+            >
               <div>
                 <Status
                   :status="props.row.paymentStatus"
@@ -257,7 +268,11 @@
                 </p>
               </div>
             </q-td>
-            <q-td :key="'amountInCents'" :props="props">
+            <q-td
+              :key="'amountInCents'"
+              :props="props"
+              @click="props.expand = !props.expand"
+            >
               <div>
                 <p class="font-medium text-base">
                   ${{ CENTSTODOLLARS(props.row.amountInCents) }}
@@ -266,7 +281,11 @@
               </div>
             </q-td>
             <q-td key="more" :props="props">
-              <p class="text-shallow">View more</p>
+              <p
+                class="text-shallow inline p-2 rounded hover:bg-gray-200 cursor-default"
+              >
+                View more
+              </p>
             </q-td>
             <q-td class="p-2">
               <svg
@@ -298,6 +317,13 @@
               :subColumn="sub_column"
             ></table-expand-row>
           </transition>
+        </template>
+        <template v-slot:no-data="{ message }">
+          <div class="full-width row flex-center text-accent q-gutter-sm">
+            <p class="text-xl font-medium text-primary uppercase my-8">
+              {{ message }}
+            </p>
+          </div>
         </template>
       </q-table>
     </div>
@@ -379,6 +405,7 @@ tr.q-tr.selected td:first-child::before {
     }
     .q-btn .q-icon {
       font-size: 1.5em;
+      color: #6d5bd0;
     }
   }
 }
@@ -390,8 +417,9 @@ import { ref, computed, onMounted } from "vue";
 // import { useQuasar } from "quasar";
 import Status from "./Status.vue";
 import TableExpandRow from "./TableExpandRow.vue";
+// import NoRecord from './NoRecord.vue'
 import { columns } from "../utils/data.js";
-import { CENTSTODOLLARS } from "../utils";
+import { CENTSTODOLLARS, checkPaymentStatus } from "../utils";
 import { useStore } from "vuex";
 const selected = ref([]);
 const loading = ref(false);
@@ -405,6 +433,8 @@ const pagination = ref({
 });
 const store = useStore();
 const users = computed(() => store.getters["allUsers"]);
+
+// function to mark user as paid
 const payDues = () => {
   loading.value = true;
   store
@@ -412,40 +442,23 @@ const payDues = () => {
     .then((data) => {
       loading.value = false;
       selected.value = [];
-      //   const location = filteredResults.value.findIndex((user) => user.id === selected.value[0].id);
       filteredResults.value.splice(data[1], 1, data[0]);
-      //   filteredResults.value = users.value;
     })
     .catch(() => (loading.value = false));
 };
+
+// function to get selected rows
 function getSelectedString() {
   return selected.value.length === 0
     ? ""
     : `${selected.value.length} record${
         selected.value.length > 1 ? "s" : ""
-      } selected of ${rows.length}`;
+      } selected of ${filteredResults.value.length}`;
 }
-const checkPaymentStatus = (status) => {
-  let any = "";
-  console.log(status);
-  switch (status) {
-    case "paid":
-      {
-        any = "Paid";
-      }
-      break;
-    case "unpaid":
-      {
-        any = "Dues";
-      }
-      break;
-    case "overdue": {
-      any = "overdue";
-    }
-  }
-  return any;
-};
+
 const tab = ref("all");
+
+// function to return total unpaid/overdue amount
 const total = computed(() => {
   const newArr = users.value.filter(
     (obj) => obj.paymentStatus === ("unpaid" || "overdue")
@@ -455,6 +468,7 @@ const total = computed(() => {
   }, 0);
 });
 
+//function to filter data
 const filterData = (any) => {
   switch (any) {
     case "all":
@@ -510,34 +524,31 @@ const filterData = (any) => {
       break;
     case "sortbyfirstname":
       {
-        filteredResults.value = filteredResults.value.sort((a, b) => {
-          if (a.firstName.toLowerCase() < b.firstName.toLowerCase()) return -1;
-          if (a.firstName.toLowerCase() > b.firstName.toLowerCase()) return 1;
-          return 0;
-        });
+        filteredResults.value = compare(filteredResults.value, "firstname");
       }
       break;
     case "sortbyemail":
       {
-        filteredResults.value = filteredResults.value.sort((a, b) => {
-          if (a.email.toLowerCase() < b.email.toLowerCase()) return -1;
-          if (a.email.toLowerCase() > b.email.toLowerCase()) return 1;
-          return 0;
-        });
+        filteredResults.value = compare(filteredResults.value, "email");
       }
       break;
     case "sortbylastname":
       {
-        filteredResults.value = filteredResults.value.sort((a, b) => {
-          if (a.lastName.toLowerCase() < b.lastName.toLowerCase()) return -1;
-          if (a.lastName.toLowerCase() > b.lastName.toLowerCase()) return 1;
-          return 0;
-        });
+        filteredResults.value = compare(filteredResults.value, "lastname");
       }
       break;
   }
 };
 const filteredResults = ref(users.value);
+
+//function to sort datas
+const compare = (arr, key) => {
+  return arr.sort((a, b) => {
+    if (a[key].toLowerCase() < b[key].toLowerCase()) return -1;
+    if (a[key].toLowerCase() > b[key].toLowerCase()) return 1;
+    return 0;
+  });
+};
 // const search = ref('')
 const fetchUsers = () => {
   loading.value = true;
@@ -550,11 +561,14 @@ const fetchUsers = () => {
     .catch(() => (loading.value = false));
 };
 const search = ref("");
+
+//search function
 const performSearch = () => {
   filteredResults.value = users.value.filter((obj) => {
     return JSON.stringify(obj).toString().toLowerCase().includes(search.value);
   });
 };
+
 const sub_column = [
   {
     name: "date",
@@ -597,13 +611,4 @@ const categories = [
   ["Email", "email"],
 ];
 const userByStatus = ["All", "Active", "Inactive"];
-
-const rows = [
-  {
-    name: "Frozen Yogurt",
-    status: 159,
-    payment_status: 6.0,
-    amount: 24,
-  },
-];
 </script>

@@ -8,6 +8,8 @@
           :columns="subColumn"
           row-key="date"
           flat
+          no-data-label="No Records Found"
+          no-results-label="No Records Found"
           :loading="loading"
         >
           <template v-slot:header="props">
@@ -40,6 +42,13 @@
                 </p>
               </q-td>
             </tr>
+          </template>
+          <template v-slot:no-data="{ message }">
+            <div class="full-width row flex-center text-accent q-gutter-sm">
+              <p class="text-xl font-medium text-primary uppercase my-8">
+                {{ message }}
+              </p>
+            </div>
           </template>
         </q-table>
       </div>
