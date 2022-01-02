@@ -425,9 +425,6 @@ const selected = ref([]);
 const loading = ref(false);
 // const $q = useQuasar();
 const pagination = ref({
-  sortBy: "desc",
-  descending: false,
-  page: 2,
   rowsPerPage: 10,
   // rowsNumber: xx if getting data from a server
 });
@@ -503,7 +500,7 @@ const filterData = (any) => {
       break;
     case "sortbyActive":
       {
-        filteredResults.value = filteredResults.value.filter(
+        filteredResults.value = users.value.filter(
           (obj) => obj.userStatus === "active"
         );
         usersSort.value = "Active";
@@ -511,7 +508,7 @@ const filterData = (any) => {
       break;
     case "sortbyInactive":
       {
-        filteredResults.value = filteredResults.value.filter(
+        filteredResults.value = users.value.filter(
           (obj) => obj.userStatus === "inactive"
         );
         usersSort.value = "Inactive";
@@ -524,7 +521,7 @@ const filterData = (any) => {
       break;
     case "sortbyfirstname":
       {
-        filteredResults.value = compare(filteredResults.value, "firstname");
+        filteredResults.value = compare(filteredResults.value, "firstName");
       }
       break;
     case "sortbyemail":
@@ -534,7 +531,7 @@ const filterData = (any) => {
       break;
     case "sortbylastname":
       {
-        filteredResults.value = compare(filteredResults.value, "lastname");
+        filteredResults.value = compare(filteredResults.value, "lastName");
       }
       break;
   }
