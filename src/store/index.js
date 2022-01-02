@@ -41,7 +41,7 @@ export default createStore({
           const data = [res.data.data, location];
           commit("MARK_USER", data);
           console.log(data);
-          return Promise.resolve(res);
+          return Promise.resolve(data);
         },
         (error) => {
           // commit("SET_TOKEN", null);
